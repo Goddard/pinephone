@@ -8,6 +8,7 @@ function jumpto
     exit
 }
 
+echo "Checking if Bmap Tool is installed"
 if [ test -x $(which bmaptool) ]; then
     echo "Bamp Tool is installed"
 else
