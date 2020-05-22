@@ -8,7 +8,7 @@ function jumpto
 }
 
 echo "Checking if Bmap Tool & Gzip is installed"
-pkgs='bmap-tools gzip dosfstools'
+pkgs='bmap-tools xz-utils dosfstools'
 if ! dpkg -s $pkgs >/dev/null 2>&1; then
   sudo apt-get install $pkgs
 else
@@ -16,7 +16,7 @@ else
     echo ""
 fi
 
-IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.gz
+IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.xz
 
 wget -N https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.bmap
 
@@ -35,12 +35,12 @@ IMGFILE="ubuntu-touch-pinephone.img"
 
 #start:
 if test -f "$FILE"; then
-    echo "Phone Image : $FILE exist"
+    echo "Phone Image: $FILE exist"
     #imagetest:
     if test -f "$IMGFILE"; then
         echo "Phone Image is ungzipped, running mkfs/Bmap Tool"
         echo ""
-        echo "Please enter your drive path(example:: /dev/sdd ) : "
+        echo "Please enter your drive path(example:: /dev/sdd ): "
         echo " -- MAKE SURE THIS IS THE CORRECT ROOT DEVICE PATH TO YOUR SDCARD --"
         echo " -- !! IT WILL DESTROY ALL DATA ON THE DEVICE !! --"
         read DEVICE_PATH
@@ -51,7 +51,7 @@ if test -f "$FILE"; then
         # echo "If the device cannot be found then it may already be unmounted. Which is fine."
         # read ANSWER
         # if [[ $ANSWER="yes" ]]; then
-            # umount $DEVICE_PATH"*"
+            umount $DEVICE_PATH
             sudo mkfs -t fat $DEVICE_PATH
             sudo bmaptool copy ubuntu-touch-pinephone.img $DEVICE_PATH
         # fi
@@ -66,8 +66,8 @@ if test -f "$FILE"; then
         #     jumpto start
         # fi
     else
-        echo "Phone Image not present ungzipping now...may take awhile depending on your system speed."
-        gzip -d $FILE
+        echo "Phone Image not present ungzipping now... may take awhile depending on your system speed."
+        unxz -d $FILE
         jumpto imagetest
     fi
 else
