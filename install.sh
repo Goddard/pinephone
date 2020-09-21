@@ -16,9 +16,9 @@ else
     echo ""
 fi
 
-IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.xz
+IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone-systemimage/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.xz
 
-wget -N https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.bmap
+wget -N https://ci.ubports.com/job/rootfs/job/rootfs-pinephone-systemimage/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.bmap
 
 # if they don't have bmap tool we could do a block level checksum foreach with this?
 # CHECKSUM_TYPE=($(grep -oP '(?<=ChecksumType>)[^<]+' "ubuntu-touch-pinephone.img.bmap"))
