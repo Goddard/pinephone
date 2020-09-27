@@ -50,12 +50,12 @@ function getPlasmaImageURLFunction() {
 }
 
 PS3='Which Image would you like to install? '
-options=("Ubuntu" "PostmarketOS" "Plasma" "Quit")
+options=("UBPorts" "PostmarketOS" "Plasma" "Quit")
 select opt in "${options[@]}"
 do
     case $opt in
-        "Ubuntu")
-            echo "Ubuntu / Ubports Selected"
+        "UBPorts")
+            echo "UBPorts / Ubuntu Selected"
 	    BMAP_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.bmap
 	    IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.xz
 		downloadFunction $BMAP_URL $IMAGE_URL
