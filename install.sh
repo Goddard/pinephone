@@ -14,17 +14,6 @@ function checkRequirementsFunction() {
 
 checkRequirementsFunction
 
-# if they don't have bmap tool we could do a block level checksum foreach with this?
-# CHECKSUM_TYPE=($(grep -oP '(?<=ChecksumType>)[^<]+' "ubuntu-touch-pinephone.img.bmap"))
-# CHECKSUM=($(grep -oP '(?<=BmapFileChecksum>)[^<]+' "ubuntu-touch-pinephone.img.bmap"))
-# echo "Checksum found : $CHECKSUM"
-# echo "Checksum type : $CHECKSUM_TYPE"
-# TODO : test with dd? this needs work
-# for i in ${!BlockMap[*]}
-# do
-#   echo "$i" "${BlockMap[$i]}"
-# done
-
 # bmap file
 # phone image
 function downloadFunction() {
