@@ -1,25 +1,18 @@
 #!/bin/bash
-function jumpto
-{
-    label=$1
-    cmd=$(sed -n "/#$label:/{:a;n;p;ba};" $0 | grep -v ':$')
-    eval "$cmd"
-    exit
+
+function checkRequirementsFunction() {
+	echo "Checking if requirements are installed"
+	pkgs='bmap-tools gzip dosfstools util-linux'
+	
+	if ! dpkg -s $pkgs >/dev/null 2>&1; then
+  		sudo apt-get install $pkgs
+	else
+    		echo "Packages found"
+    		echo ""
+	fi
 }
 
-echo "Checking if Bmap Tool & Gzip is installed"
-pkgs='bmap-tools gzip dosfstools'
-if ! dpkg -s $pkgs >/dev/null 2>&1; then
-  sudo apt-get install $pkgs
-else
-    echo "Packages found"
-    echo ""
-fi
-#plasma images
-#https://images.plasma-mobile.org/pinephone/
-IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.xz
-
-wget -N https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.bmap
+checkRequirementsFunction
 
 # if they don't have bmap tool we could do a block level checksum foreach with this?
 # CHECKSUM_TYPE=($(grep -oP '(?<=ChecksumType>)[^<]+' "ubuntu-touch-pinephone.img.bmap"))
@@ -31,57 +24,74 @@ wget -N https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBui
 # do
 #   echo "$i" "${BlockMap[$i]}"
 # done
-FILE="ubuntu-touch-pinephone.img.xz"
-IMGFILE="ubuntu-touch-pinephone.img.xz"
 
-#start:
-if test -f "$FILE"; then
-    echo "Phone Image : $FILE exist"
-    #imagetest:
-    if test -f "$IMGFILE"; then
-        echo "Phone Image is ungzipped, running mkfs/Bmap Tool"
-        echo ""
-        echo "Please enter your drive path(example:: /dev/sdd ) : "
+# bmap file
+# phone image
+function downloadFunction() {
+	echo "Attempting to downloading bmap file if newer."
+	if $1 != false; then
+		wget -c -N $1
+	fi
+
+	echo "Attempting to download image file if newer."
+	wget -c -N $2
+}
+
+#file system creator
+#bmap writer
+function formatDeviceFunction() {
+	lsblk
+	echo ""
+        echo "Please enter your drive path ( example:: /dev/sdd ), read above for a complete list : "
         echo " -- MAKE SURE THIS IS THE CORRECT ROOT DEVICE PATH TO YOUR SDCARD --"
         echo " -- !! IT WILL DESTROY ALL DATA ON THE DEVICE !! --"
         read DEVICE_PATH
-        echo "Formatting Device"
-        # TODO : check if device is mounted and fix
-        # ls -hl $DEVICE_PATH"*"
-        # echo "Does this look correct? (yes/no)"
-        # echo "If the device cannot be found then it may already be unmounted. Which is fine."
-        # read ANSWER
-        # if [[ $ANSWER="yes" ]]; then
-            # umount $DEVICE_PATH"*"
-            sudo mkfs -t fat $DEVICE_PATH
-            sudo bmaptool copy ubuntu-touch-pinephone.img.xz $DEVICE_PATH
-        # fi
-        # TODO : add checking for dd and bmap?
-        # CHECKSUM_RESULT=$($CHECKSUM_TYPE"sum" $IMGFILE)
-        # if [[ $CHECKSUM_RESULT = $CHECKSUM ]]; then
-        #     echo "Checksum is a match, not re-downloading."
-        #     jumpto end
-        # else
-        #     echo "Checksum doesn't match, re-downloading."
-        #     wget -N $IMAGE_URL
-        #     jumpto start
-        # fi
-    else
-        echo "Phone Image not present ungzipping now...may take awhile depending on your system speed."
-        if test -f "$FILE"; then
-#             gzip -d $FILE
-            #rm $IMGFILE
-            jumpto imagetest
-        else
-            jumpto download
-        fi
-    fi
-else
-    #download:
-    echo "Downloading image"
-    wget -N $IMAGE_URL
-    jumpto imagetest
-fi
+        echo "Attempting to write file system"
+	sudo mkfs -t fat $DEVICE_PATH
+	echo "Attempting to write image to destinate"
+	if $2 == true; then
+        	sudo bmaptool copy --nobmap $1 $DEVICE_PATH
+	else
+		sudo bmaptool copy $1 $DEVICE_PATH
+	fi
+}
 
-#end:
+function getPlasmaImageURLFunction() {
+	return wget -qO- https://images.plasma-mobile.org/pinephone/ | grep -Po '(?<=href=")[^"]*(?=")' | tail -1
+}
+
+PS3='Which Image would you like to install? '
+options=("Ubuntu" "PostmarketOS" "Plasma" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Ubuntu")
+            echo "Ubuntu / Ubports Selected"
+	    BMAP_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.bmap
+	    IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.xz
+		downloadFunction $BMAP_URL $IMAGE_URL
+		formatDeviceFunction "ubuntu-touch-pinephone.img.xz"
+            ;;
+        "PostmarketOS")
+            echo "you chose choice 2"
+            ;;
+        "Plasma")
+		echo "$REPLY / $opt Selected"
+		echo "Looking for images"
+		#plasma has no bmap file, need to create it ourselves?
+		#https://images.plasma-mobile.org/pinephone/
+		FILE_NAME=$(wget -qO- https://images.plasma-mobile.org/pinephone/ | grep -Po '(?<=href=")[^"]*(?=")' | tail -1)
+		IMAGE_URL="https://images.plasma-mobile.org/pinephone/"$FILE_NAME
+		echo "Found Image : "$IMAGE_URL
+		wget -c -N $IMAGE_URL
+		echo $FILE_NAME
+		formatDeviceFunction $FILE_NAME true
+            ;;
+        "Quit")
+            break
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
 echo "Finished"
