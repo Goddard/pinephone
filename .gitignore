@@ -2,3 +2,5 @@ otherimgs
 *.img
 *.img.bmap
 *.img.gz
+other-research
+*.img.xz

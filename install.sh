@@ -15,8 +15,9 @@ else
     echo "Packages found"
     echo ""
 fi
-
-IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.gz
+#plasma images
+#https://images.plasma-mobile.org/pinephone/
+IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.xz
 
 wget -N https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.bmap
 
@@ -30,8 +31,8 @@ wget -N https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBui
 # do
 #   echo "$i" "${BlockMap[$i]}"
 # done
-FILE="ubuntu-touch-pinephone.img.gz"
-IMGFILE="ubuntu-touch-pinephone.img"
+FILE="ubuntu-touch-pinephone.img.xz"
+IMGFILE="ubuntu-touch-pinephone.img.xz"
 
 #start:
 if test -f "$FILE"; then
@@ -53,7 +54,7 @@ if test -f "$FILE"; then
         # if [[ $ANSWER="yes" ]]; then
             # umount $DEVICE_PATH"*"
             sudo mkfs -t fat $DEVICE_PATH
-            sudo bmaptool copy ubuntu-touch-pinephone.img $DEVICE_PATH
+            sudo bmaptool copy ubuntu-touch-pinephone.img.xz $DEVICE_PATH
         # fi
         # TODO : add checking for dd and bmap?
         # CHECKSUM_RESULT=$($CHECKSUM_TYPE"sum" $IMGFILE)
@@ -67,10 +68,16 @@ if test -f "$FILE"; then
         # fi
     else
         echo "Phone Image not present ungzipping now...may take awhile depending on your system speed."
-        gzip -d $FILE
-        jumpto imagetest
+        if test -f "$FILE"; then
+#             gzip -d $FILE
+            #rm $IMGFILE
+            jumpto imagetest
+        else
+            jumpto download
+        fi
     fi
 else
+    #download:
     echo "Downloading image"
     wget -N $IMAGE_URL
     jumpto imagetest
