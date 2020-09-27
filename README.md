@@ -2,6 +2,10 @@
 
 Project was started to make it quick and easy to install images on the PinePhone64
 
+# Supported Images
+ - UBPorts
+ - Plasma Mobile from KDE
+
 # Roadmap
 
  - Add more images
