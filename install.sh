@@ -78,13 +78,10 @@ do
         "Plasma")
 		echo "$REPLY / $opt Selected"
 		echo "Looking for images"
-		#plasma has no bmap file, need to create it ourselves?
-		#https://images.plasma-mobile.org/pinephone/
 		FILE_NAME=$(wget -qO- https://images.plasma-mobile.org/pinephone/ | grep -Po '(?<=href=")[^"]*(?=")' | tail -1)
 		IMAGE_URL="https://images.plasma-mobile.org/pinephone/"$FILE_NAME
 		echo "Found Image : "$IMAGE_URL
 		wget -c -N $IMAGE_URL
-		echo $FILE_NAME
 		formatDeviceFunction $FILE_NAME true
             ;;
         "Quit")
