@@ -62,7 +62,7 @@ do
 		formatDeviceFunction "ubuntu-touch-pinephone.img.xz"
             ;;
         "PostmarketOS")
-            echo "you chose choice 2"
+            echo "This doesn't work yet."
             ;;
         "Plasma")
 		echo "$REPLY / $opt Selected"
