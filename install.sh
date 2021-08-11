@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function checkRequirementsFunction() {
-	echo "Checking if requirements are installed"
+	printf "Checking if requirements are installed\n"
 	pkgs='bmap-tools gzip dosfstools util-linux'
 	
 	if ! dpkg -s $pkgs >/dev/null 2>&1; then
@@ -17,12 +17,12 @@ checkRequirementsFunction
 # bmap file
 # phone image
 function downloadFunction() {
-	echo "Attempting to downloading bmap file if newer."
+	printf "Attempting to downloading bmap file if newer.\n"
 	if $1 != false; then
 		wget -c -N $1
 	fi
 
-	echo "Attempting to download image file if newer."
+	printf "Attempting to download image file if newer.\n"
 	wget -c -N $2
 }
 
@@ -31,13 +31,14 @@ function downloadFunction() {
 function formatDeviceFunction() {
 	lsblk
 	echo ""
-        echo "Please enter your drive path ( example:: /dev/sdd ), read above for a complete list : "
-        echo " -- MAKE SURE THIS IS THE CORRECT ROOT DEVICE PATH TO YOUR SDCARD --"
-        echo " -- !! IT WILL DESTROY ALL DATA ON THE DEVICE !! --"
+        printf "
+Please enter your drive path ( example:: /dev/sdd ), read above for a complete list : 
+ -- MAKE SURE THIS IS THE CORRECT ROOT DEVICE PATH TO YOUR SDCARD --
+ -- !! IT WILL DESTROY ALL DATA ON THE DEVICE !! --\n"
         read DEVICE_PATH
-        echo "Attempting to write file system"
+        printf "Attempting to write file system\n"
 	sudo mkfs -t fat $DEVICE_PATH
-	echo "Attempting to write image to destinate"
+	printf "Attempting to write image to destinate\n"
 	if $2 == true; then
         	sudo bmaptool copy --nobmap $1 $DEVICE_PATH
 	else
@@ -55,29 +56,29 @@ select opt in "${options[@]}"
 do
     case $opt in
         "UBPorts")
-            echo "UBPorts / Ubuntu Selected"
+            printf "UBPorts / Ubuntu Selected\n"
 	    BMAP_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.bmap
 	    IMAGE_URL=https://ci.ubports.com/job/rootfs/job/rootfs-pinephone/lastSuccessfulBuild/artifact/ubuntu-touch-pinephone.img.xz
 		downloadFunction $BMAP_URL $IMAGE_URL
 		formatDeviceFunction "ubuntu-touch-pinephone.img.xz"
             ;;
         "PostmarketOS")
-            echo "This doesn't work yet."
+            printf "This doesn't work yet.\n"
             ;;
         "Plasma")
-		echo "$REPLY / $opt Selected"
-		echo "Looking for images"
+		printf "%b / %b Selected\n" "$REPLY" "$opt"
+		printf "Looking for images\n"
 		FILE_NAME=$(wget -qO- https://images.plasma-mobile.org/pinephone/ | grep -Po '(?<=href=")[^"]*(?=")' | tail -1)
 		IMAGE_URL="https://images.plasma-mobile.org/pinephone/"$FILE_NAME
-		echo "Found Image : "$IMAGE_URL
+		printf "Found Image : %b\n" "$IMAGE_URL"
 		wget -c -N $IMAGE_URL
 		formatDeviceFunction $FILE_NAME true
             ;;
         "Quit")
             break
             ;;
-        *) echo "invalid option $REPLY";;
+        *) printf "invalid option %b\n" "$REPLY";;
     esac
 done
 
-echo "Finished"
+printf "Finished\n"
