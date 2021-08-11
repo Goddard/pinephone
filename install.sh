@@ -30,7 +30,6 @@ function downloadFunction() {
 #bmap writer
 function formatDeviceFunction() {
 	lsblk
-	echo ""
         printf "
 Please enter your drive path ( example:: /dev/sdd ), read above for a complete list : 
  -- MAKE SURE THIS IS THE CORRECT ROOT DEVICE PATH TO YOUR SDCARD --
